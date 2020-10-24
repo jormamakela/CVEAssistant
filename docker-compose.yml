@@ -1,0 +1,5 @@
+assistant:
+        build: assistant
+        volumes:
+                - .:/opt/project
+        entrypoint: ["/opt/project/assistant/run.sh"]
