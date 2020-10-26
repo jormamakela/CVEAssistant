@@ -1,2 +1,3 @@
 #!/bin/bash
-echo "Hello"
+cd /opt/project
+python3 -m assistant gui
