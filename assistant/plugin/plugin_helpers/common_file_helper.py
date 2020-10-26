@@ -1,4 +1,6 @@
 import json
+import urllib.request
+import gzip
 
 
 def read_file_as_string(file_path):
@@ -27,3 +29,17 @@ def parse_any_dict_from_string(data):
             parsed = lines.split("=")
             rv[parsed[0]] = parsed[1]
     return rv
+
+
+def download_file_from_to(url, path_to):
+    urllib.request.urlretrieve(url, path_to)
+
+
+def extract_gzip_to_file(gzip_file, extract):
+    gzip_file_handle = gzip.GzipFile(gzip_file, 'rb')
+    s = gzip_file_handle.read()
+    gzip_file_handle.close()
+    output = open(extract, 'wb')
+    output.write(s)
+    output.close()
+

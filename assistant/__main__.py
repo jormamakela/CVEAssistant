@@ -1,10 +1,14 @@
 __package__ = 'assistant'
 
+import glob
+from os import path
+from os import mkdir
 import importlib
 import argparse
 from .plugin_manager import PluginManager
 from .config_manager import ConfigManager
 from .log_manager import LogManager
+from .database_manager import DatabaseManager
 
 
 def arg_parser_portion():
@@ -56,14 +60,21 @@ def prep_plugin_manager(log_manager, conf_manager, database, args):
 
 
 def init_main_routine():
+    for path_check in glob.glob("./assistant", recursive=True):
+        if path.exists(path_check):
+            if not path.exists(path_check + "/data"):
+                mkdir(path_check + "/data")
     args = arg_parser_portion()
     log_manager = prep_log_manager()
     conf_manager = read_configs(log_manager)
     log_manager.handle_component_config(conf_manager.return_config_data())
-    database = None
+    database = DatabaseManager(log_manager)
+    database.go()
     interface = init_user_interface(log_manager, args)
     plug_manager = prep_plugin_manager(log_manager, conf_manager, database, args)
     plug_manager.make_plugins_go()
+    plug_manager.send_command_all_loaded_plugins("CheckAlive")
+    plug_manager.send_command_all_loaded_plugins(args.args)
 
 
 init_main_routine()

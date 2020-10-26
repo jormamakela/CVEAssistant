@@ -1,5 +1,5 @@
 from datetime import date
-from .helpers.common_file_helper import *
+from assistant.plugin.plugin_helpers.common_file_helper import *
 
 
 class LogManager:

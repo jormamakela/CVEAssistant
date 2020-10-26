@@ -48,7 +48,11 @@ class PluginManager:
 
     def send_command_all_loaded_plugins(self, command):
         for plugin in self.plugins:
-            self.plugins[plugin].handle_command(command)
+            if isinstance(command, list):
+                c = command[0]
+                if hasattr(self.plugins[plugin], c):
+                    _method = getattr(self.plugins[plugin], c)
+                    _method(command)
 
     def send_command_to_plugin(self, plugin, command):
         if plugin in self.plugins:
