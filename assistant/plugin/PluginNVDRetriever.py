@@ -8,7 +8,6 @@ from .plugin_helpers import common_file_helper
 class PluginNVDRetriever:
 
     def __init__(self, log_manager, args):
-        self.ui_root = None
         self.passed_args = args
         self.component_name = "PluginNVDRetriever"
         self.component_version = "0.0.0"
@@ -59,4 +58,5 @@ class PluginNVDRetriever:
                 common_file_helper.extract_gzip_to_file(file, extract_name)
             if "9999999999" in file:
                 common_file_helper.extract_gzip_to_file(file, extract_name)
+        self.logger.log("*** Retrieve - NVD Data complete")
 
