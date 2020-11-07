@@ -43,3 +43,23 @@ def extract_gzip_to_file(gzip_file, extract):
     output.write(s)
     output.close()
 
+
+def remove_unwanted_characters(clean):
+    clean = clean.replace('[', '')
+    clean = clean.replace(']', '')
+    clean = clean.replace('{', '')
+    clean = clean.replace('}', '')
+    clean = clean.replace("\t", '')
+    clean = clean.replace("\n", '')
+    return clean
+
+
+def parse_json_file(from_file):
+    f = open(from_file, 'r')
+    data = f.read()
+    f.close()
+    return json.loads(data)
+
+
+def replace_commas(in_str, replace_with="(comma)"):
+    return in_str.replace(",", replace_with)

@@ -17,6 +17,8 @@ class DatabaseManager:
     def go(self):
         self.logger.log("Go called at " + self.component_name + " ver " + self.component_version)
         for rel_path in glob.glob("./**/data", recursive=True):
+            if "security-tracker" in rel_path:
+                continue
             self.database_path_base = rel_path
         self.db_full_path = self.database_path_base + "/" + self.database_file_name
         self.logger.log("Relative database path found at ... " + self.db_full_path)
