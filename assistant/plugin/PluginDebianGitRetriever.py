@@ -1,6 +1,5 @@
 import git
 import glob
-from git import Repo
 
 
 class PluginDebianGitRetriever:
@@ -17,6 +16,8 @@ class PluginDebianGitRetriever:
     def go(self):
         self.logger.log("Go called at " + self.component_name + " ver " + self.component_version)
         for file in glob.glob("./**/data", recursive=True):
+            if "security-tracker" in file:
+                continue
             self.data_path = file
 
     def download(self, command):

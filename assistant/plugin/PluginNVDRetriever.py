@@ -22,6 +22,8 @@ class PluginNVDRetriever:
     def go(self):
         self.logger.log("Go called at " + self.component_name + " ver " + self.component_version)
         for file in glob.glob("./**/data", recursive=True):
+            if "security-tracker" in file:
+                continue
             self.data_path = file
 
     def handle_component_config(self, data):
