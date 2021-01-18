@@ -2,4 +2,6 @@ assistant:
         build: assistant
         volumes:
                 - .:/opt/project
+        ports:
+                - "8888:8888"
         entrypoint: ["/opt/project/assistant/run.sh"]
