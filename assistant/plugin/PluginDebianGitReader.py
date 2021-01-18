@@ -52,6 +52,7 @@ class PluginDebianGitReader:
     def refresh_cve(self):
         self.logger.log("Refresh CVE")
         db_c = self.database_conn.db_cursor
+        debug_entry = "NOSUCHENTRYEVEERMADE"
         try:
             db_c.execute('''DROP TABLE ''' + str(self.table_used_cve))
         except sqlite3.OperationalError as err:
@@ -67,7 +68,10 @@ class PluginDebianGitReader:
                 key_text = cve_item["CVE_SPECIAL_TEXT"]
                 reference = cve_item["CVE_REFERENCE"]
                 notes_all = cve_item["NOTES"]
+                no_branch_items = True
                 notes_combined = False
+                if debug_entry in cve:
+                    print(cve_item)
                 for n in notes_all:
                     if not notes_combined:
                         notes_combined = n
@@ -75,13 +79,29 @@ class PluginDebianGitReader:
                         notes_combined = notes_combined + "\n" + n
                 for branch in cve_item["branch"]:
                     for p in cve_item["branch"][branch]:
+                        no_branch_items = False
                         package = cve_item["branch"][branch][p]["package"]
                         version = cve_item["branch"][branch][p]["version"]
                         fix_text = cve_item["branch"][branch][p]["text"]
                         add_in = [cve, text, keywords, key_text, reference, branch, package,
                                   version, fix_text, notes_combined]
                         statement = "INSERT INTO " + self.table_used_cve + " VALUES (?,?,?,?,?,?,?,?,?,?)"
+                        if debug_entry in add_in:
+                            print("DEBUG-VERIFICATION")
+                            print(statement)
+                            print(add_in)
+                            print("---")
                         db_c.execute(statement, add_in)
+                if no_branch_items:
+                    add_in = [cve, text, keywords, key_text, reference, "NOBRANCH", "NOPACKAGE",
+                              "NOVERSION", "NOFIXTEXT", notes_combined]
+                    statement = "INSERT INTO " + self.table_used_cve + " VALUES (?,?,?,?,?,?,?,?,?,?)"
+                    if debug_entry in add_in:
+                        print("DEBUG-VERIFICATION")
+                        print(statement)
+                        print(add_in)
+                        print("---")
+                    db_c.execute(statement, add_in)
         self.database_conn.commit_db()
 
     def refresh_dxa(self):
@@ -102,6 +122,7 @@ class PluginDebianGitReader:
                     a_text = dxa["alert_text"]
                     a_reference = dxa["ALERT_REFERENCE"]
                     a_freeform = dxa["freeform"]
+                    has_no_package = True
                     freeform = False
                     for a in a_freeform:
                         if not freeform:
@@ -109,9 +130,18 @@ class PluginDebianGitReader:
                         else:
                             freeform = freeform + "\n" + a
                     for pk in dxa["package"]:
+                        has_no_package = True
                         branch = pk["branch"]
                         package = pk["package"]
                         version = pk["version"]
+                        add_in = [date, dxa_type, alert, a_text, a_reference, freeform,
+                                  branch, package, version]
+                        statement = "INSERT INTO " + self.table_used_alerts + " VALUES (?,?,?,?,?,?,?,?,?)"
+                        db_c.execute(statement, add_in)
+                    if has_no_package:
+                        branch = "NOBRANCH"
+                        package = "NOPACKAGE"
+                        version = "NOVERSION"
                         add_in = [date, dxa_type, alert, a_text, a_reference, freeform,
                                   branch, package, version]
                         statement = "INSERT INTO " + self.table_used_alerts + " VALUES (?,?,?,?,?,?,?,?,?)"
@@ -131,6 +161,7 @@ class PluginDebianGitReader:
     def parse_debian_cve(self, file_path):
         self.logger.log("Start DebianFileParseCVE " + str(file_path))
         read_cve = "\n----\nCVE-DOES-NOT-EXIST\n" + read_file_as_string(file_path)
+        debug_entry = "NOSUCHENTRY"
         for cve_entries in read_cve.split("CVE-"):
             entry = dict()
             cve_key = None
@@ -142,8 +173,14 @@ class PluginDebianGitReader:
             entry["branch"] = dict()
             entry["branch"]["default"] = dict()
             entry["NOTES"] = []
+            debug_this = False
             cve_entries = "CVE-" + cve_entries
             for lines in cve_entries.splitlines():
+                if debug_entry in lines:
+                    debug_this = True
+                    print("Debug enabled for lines...")
+                if debug_this:
+                    print(lines)
                 if lines.startswith("\t"):
                     if lines.startswith("\t{"):
                         lines.replace("\t", "")
@@ -201,6 +238,9 @@ class PluginDebianGitReader:
             if cve_key not in self.data_cve:
                 self.data_cve[cve_key] = []
                 self.data_cve[cve_key].append(entry)
+                if debug_this:
+                    print("Adding...")
+                    print(entry)
 
     def parse_debian_dxa(self, file_path, type):
         self.logger.log("Start DebianFileParseDLA " + str(file_path))
